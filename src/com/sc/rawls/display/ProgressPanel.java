@@ -11,6 +11,7 @@ public class ProgressPanel extends JPanel{
 	public ProgressPanel()
 	{
 		prog = new JLabel("Loading Image");
+		prog.setLocation(5, 5);
 		this.add(prog);
 	}
 	

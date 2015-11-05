@@ -54,7 +54,7 @@ public class Histogrammer {
 		frame.remove(ep);
 		frame.setVisible(false);
 		frame.add(lip);
-		frame.setPreferredSize(new Dimension(200, 250));
+		frame.setPreferredSize(new Dimension(200, 300));
 		frame.pack();
 		frame.setVisible(true);
 	}
