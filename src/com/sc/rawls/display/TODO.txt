@@ -1,0 +1,4 @@
+TODO
+
+Add 64 Color Resolution functions to UI elements.
+Ad Layout Manager?

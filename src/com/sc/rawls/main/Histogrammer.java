@@ -43,7 +43,7 @@ public class Histogrammer {
 		frame.remove(mp);
 		frame.setVisible(false);
 		frame.add(lip);
-		frame.setPreferredSize(new Dimension(200, 250));
+		frame.setPreferredSize(new Dimension(250, 375));
 		frame.pack();
 		frame.setVisible(true);
 		//System.out.println("Number of components: " + frame.getComponentCount());
@@ -54,7 +54,7 @@ public class Histogrammer {
 		frame.remove(ep);
 		frame.setVisible(false);
 		frame.add(lip);
-		frame.setPreferredSize(new Dimension(200, 300));
+		frame.setPreferredSize(new Dimension(250, 375));
 		frame.pack();
 		frame.setVisible(true);
 	}
@@ -82,12 +82,26 @@ public class Histogrammer {
 			System.out.println("Getting Image Data");
 			int[] data = ((DataBufferInt) n_img.getRaster().getDataBuffer()).getData();
 			pp.updateLabel("Adding image data to bins");
-			System.out.println("Adding image data to bins");
+			System.out.print("Adding image data to bins");
 			for(int i = 0; i < data.length; i++)
 			{
-				System.out.println("Adding data for pixel: " + i + "|" + data[i]);
-				h.addToBin(data[i]);
+				if(c_res == Histogram.COLOR_RES_256)
+					h.addToBin(data[i]);
+				else if(c_res == Histogram.COLOR_RES_64)
+					h.addToBin64(data[i]);
+				
+				if(i % 20 == 0)
+				{
+					System.out.print(" " + i);
+				}
+				if(i % 4000 == 0)
+				{
+					System.out.println("");
+				}
 			}
+			
+			if(c_res == Histogram.COLOR_RES_64)
+				h.calcAverageBinColor64();
 			
 			System.out.println("Beginning data sorting");
 			int done = 0;
@@ -97,8 +111,13 @@ public class Histogrammer {
 				done = h.greenMergeSortBins();
 			else if(s_method == 3)
 				done = h.blueMergeSortBins();
-			else
+			else if(s_method == 4)
 				done = h.quickAccurateSort();
+			else if(s_method == 5)
+				done = h.fullSortColors64();
+			else
+				done = h.bin256Sort64();
+			
 			if(done == 1)
 			{
 				pp.updateLabel("Finished Sort");
@@ -132,7 +151,7 @@ public class Histogrammer {
 		frame.setVisible(false);
 		frame.remove(pp);
 		frame.add(lip);
-		frame.setPreferredSize(new Dimension(200, 250));
+		frame.setPreferredSize(new Dimension(250, 375));
 		frame.pack();
 		frame.setVisible(true);
 	}

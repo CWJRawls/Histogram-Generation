@@ -20,7 +20,7 @@ public class LoadImagePanel extends JPanel implements ActionListener{
 
 	String path, s_path;
 	JButton but, but1, buts;
-	JRadioButton r,g,b,a;
+	JRadioButton r,g,b,a,b64_1,b64_2;
 	ButtonGroup rg;
 	//JLabel status;
 	
@@ -33,17 +33,21 @@ public class LoadImagePanel extends JPanel implements ActionListener{
 		but.setLocation(5, 5);
 		but.addActionListener(this);
 		but1 = new JButton("Start");
-		but1.setLocation(5, 155);
+		but1.setLocation(5, 170);
 		but1.addActionListener(this);
-		r = new JRadioButton("Red-Merge Sort");
+		r = new JRadioButton("Red-Merge Sort (Res-256)");
 		r.setSelected(true);
-		g = new JRadioButton("Green-Merge Sort");
-		b = new JRadioButton("Blue-Merge Sort");
-		a = new JRadioButton("Full Precision Sort (Slow)");
+		g = new JRadioButton("Green-Merge Sort (Res-256)");
+		b = new JRadioButton("Blue-Merge Sort (Res-256)");
+		a = new JRadioButton("Full Precision Sort (Res-256) (Slow)");
+		b64_1 = new JRadioButton("Top 64 Colors (Res-64)");
+		b64_2 = new JRadioButton("Top 256 Color (Res-64)");
 		r.setLocation(new Point(5, 80));
 		g.setLocation(new Point(5, 95));
 		b.setLocation(new Point(5, 110));
 		a.setLocation(new Point(5, 125));
+		b64_1.setLocation(5, 140);
+		b64_2.setLocation(5, 155);
 		JLabel label = new JLabel("Sorting Method");
 		label.setLocation(5, 75);
 		//JLabel status = new JLabel("No Image Selected");
@@ -54,6 +58,8 @@ public class LoadImagePanel extends JPanel implements ActionListener{
 		rg.add(g);
 		rg.add(b);
 		rg.add(a);
+		rg.add(b64_1);
+		rg.add(b64_2);
 		this.add(but);
 		this.add(buts);
 		this.add(label);
@@ -61,6 +67,8 @@ public class LoadImagePanel extends JPanel implements ActionListener{
 		this.add(g);
 		this.add(b);
 		this.add(a);
+		this.add(b64_1);
+		this.add(b64_2);
 		//this.add(status);
 		this.add(but1);
 	}
@@ -102,10 +110,20 @@ public class LoadImagePanel extends JPanel implements ActionListener{
 					selection = 3;
 					c_res = Histogram.COLOR_RES_256;
 				}
-				else
+				else if(a.isSelected())
 				{
 					selection = 4;
 					c_res = Histogram.COLOR_RES_256;
+				}
+				else if(b64_1.isSelected())
+				{
+					selection = 5;
+					c_res = Histogram.COLOR_RES_64;
+				}
+				else
+				{
+					selection = 6;
+					c_res = Histogram.COLOR_RES_64;
 				}
 				System.out.println("Starting Image Read");
 				Histogrammer.readAndSortImage(path, s_path,selection,c_res);

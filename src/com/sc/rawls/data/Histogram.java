@@ -20,24 +20,21 @@ public class Histogram {
 	
 	public Histogram(int crf)
 	{
-		
+		//set the resolution flag
 		colorResFlag = crf;
-		//init the matrix with 0s
-		for(int i = 0; i < 256; i++)
-		{
-			for(int j = 0; j < 256; j++)
-			{
-				for(int k = 0; k < 256; k++)
-				{
-					bins[i][j][k] = 0;
-					int color = 0;
-					color += i;
-					color += j << 8;
-					color += k << 16;
-					colors[i][j][k] = color;
-				}
-			}
-		}
+		
+		//initialize the matrices
+		if(crf == COLOR_RES_256)
+			initMatrices(256, 1);
+		else if(crf == COLOR_RES_64)
+			initMatrices(64, 0);
+		else if(crf == COLOR_RES_32)
+			initMatrices(32, 0);
+		else if(crf == COLOR_RES_16)
+			initMatrices(16, 0);
+		else
+			initMatrices(256, 1); //default, though there should never be any sorting done if crf does not match a defined flag
+			
 		
 		System.out.println("Finished Constructor");
 	}
@@ -79,6 +76,40 @@ public class Histogram {
 				sig_colors[j + 1] = sig_colors[j];
 				sig_bins[j] = temp;
 				sig_colors[j] = temp_c;
+			}
+		}
+	}
+	
+	//utility function for initializing arrays for holding the most signficant values so far
+	private void initSigArrays(int dim)
+	{
+		sig_bins = new int[dim];
+		sig_colors = new int[dim];
+		
+		for(int i = 0; i < dim; i++)
+		{
+			sig_bins[i] = 0;
+			sig_colors[i] = 0;
+		}
+	}
+	
+	private void initMatrices(int dim, int color_init)
+	{
+		bins = new int[dim][dim][dim];
+		colors = new int[dim][dim][dim];
+		
+		for(int i = 0; i < dim; i++)
+		{
+			for(int j = 0; j < dim; j++)
+			{
+				for(int k = 0; k < dim; k++)
+				{
+					bins[i][j][k] = 0;
+					if(color_init == 1)
+						colors[i][j][k] = (i) + (j << 8) + (k << 16);
+					else
+						colors[i][j][k] = 0;
+				}
 			}
 		}
 	}
@@ -391,15 +422,13 @@ public class Histogram {
 		if(colorResFlag != COLOR_RES_64)
 			return 0;
 		
-		colors = new int[64][64][64];
-		bins  = new int[64][64][64];
-		
-		reInitMatrices(64);
 		
 		int r = 0xFF & (color);
 		int g = 0xFF & (color >> 8);
 		int b = 0xFF & (color >> 16);
 		int offset = (r % 4) + ((g % 4) * 4) + ((b % 4) * 16);
+		
+		//System.out.println("Offset = " + offset);
 		
 		r /= 4;
 		g /= 4;
@@ -418,27 +447,36 @@ public class Histogram {
 		if(colorResFlag != COLOR_RES_64)
 			return 0;
 		
+		System.out.println("");
+		System.out.print("Averaging Bins ");
 		//using a single value to traverse matrix with single loop
 		for(int x = 0; x < 64; x++)
 		{
 			for(int y = 0; y < 64; y++)
 			{
 				for(int z = 0; z < 64; z++)
-				{
+				{	
 					if(bins[x][y][z] != 0)
 					{
 						int c = colors[x][y][z] / bins[x][y][z]; //get the average offset
 						
+						System.out.println("c = " + c);
+						
 						//find the top left color for this group of bins.
-						int base_color = ((x * 4)) + ((y * 4) << 8) + ((z * 4)  << 16);
+						int base_color = ((x * 4)) + ((y * 4) << 8) + ((z * 4) << 16);
 						
 						//get the offsets for each color
 						int b = c / 16; //find the plane of the 3d offset matrix
-						int g = b / 4; //find the row within the offset plane
-						int r = b % 4; //find the column within the offset plane
+						int g = (c - b * 16) / 4; //find the row within the offset plane
+						int r = (c - b * 16) % 4; //find the column within the offset plane
+
+						
+						System.out.print("Offsets " + c + " " + r + "|" + g +"|" + b);						
 						
 						//add average offsets into the base
 						base_color += r + (g << 8) + (b << 16);
+						
+						System.out.println(" Final Color: " + base_color);
 						
 						//set it back into the array;
 						colors[x][y][z] = base_color;
@@ -457,11 +495,19 @@ public class Histogram {
 			return 0;
 		
 		sortFlag = 6;
-		
+		System.out.print("Sorting Data");
 		for(int z = 0; z < 64; z++)
 		{
 			for(int i = 0; i < 4096; i++)
 			{
+				/*
+				//printing methods
+				if(i % 10 == 0)
+					System.out.print("#");
+				if(i % 1000 == 0)
+					System.out.println("");
+					*/
+				
 				int temp = bins[i % 64][i / 64][z];
 				int temp_c = colors[i % 64][i / 64][z];
 				int k = i - 1;
@@ -507,12 +553,77 @@ public class Histogram {
 		return 1;
 	}
 	
+	//sorts though all the bins and returns a sorted list of the top 256 values (over the specified threshold)
+	public int bin256Sort64()
+	{
+		//color resolution check
+		if(colorResFlag != COLOR_RES_64)
+			return 0;
+		
+		System.out.print("Sorting Data");
+		//set the sorting flag to avoid trying to return the incorrect values
+		sortFlag = 7;
+		int head = 0;
+		initSigArrays(256);
+		
+		for(int x = 0; x < 64; x++)
+		{
+			for(int y = 0; y < 64; y++)
+			{
+				for(int z = 0; z < 64; z++)
+				{
+					/*
+					//printing methods
+					if(x % 4 == 0)
+						System.out.print("#");
+					if(y / 63 == 1)
+						System.out.println(""); */
+					
+					if(bins[x][y][z] > 100)
+					{
+						//if we have not yet filled the array of significant values
+						if(head < sig_bins.length - 1)
+						{
+							sig_bins[head] = bins[x][y][z];
+							sig_colors[head] = colors[x][y][z];
+							
+							head++;
+							
+							//if that value filled the array, then sort them
+							if(head == sig_bins.length - 1)
+							{
+								sortSigArrays();
+							}
+						}
+						//if the array is full, but this value is more significant
+						else if(head == sig_bins.length - 1 && bins[x][y][z] > sig_bins[head])
+						{
+							sig_bins[head] = bins[x][y][z];
+							sig_colors[head] = colors[x][y][z];
+							
+							//sort to make sure the the color of lowest occurence is always at the end.
+							sortSigArrays();
+						}
+					}
+				}
+			}
+		}
+		
+		//if for seom reason we did not fill the entire array, then sort before returning
+		if(head < sig_bins.length - 1)
+		{
+			sortSigArrays();
+		}
+		
+		return 1;
+	}
+	
 	
 	/*--------------------------------*/
 	/*    DATA OUTPUT FUNCTIONS       */
 	/*--------------------------------*/
 	
-	
+	//Programmers should be wary of 0 returns from sort functions and avoid calling this function in that case
 	public int[][] getSortedArray()
 	{
 		//need to change array grab based on sort method
@@ -550,6 +661,24 @@ public class Histogram {
 		{
 			output = new int[sig_bins.length][1];
 			for(int i = 0; i < sig_bins.length; i++)
+			{
+				output[i][0] = sig_colors[i];
+			}
+		}
+		else if(sortFlag == 6)
+		{
+			//only return the 64 top colors
+			output = new int[64][1];
+			for(int i = 0; i < 64; i++)
+			{
+				output[i][0] = colors[i][0][0];
+			}
+		}
+		else if(sortFlag == 7)
+		{
+			//return the top 256 colors
+			output = new int[256][1];
+			for(int i = 0; i < 256; i++)
 			{
 				output[i][0] = sig_colors[i];
 			}
