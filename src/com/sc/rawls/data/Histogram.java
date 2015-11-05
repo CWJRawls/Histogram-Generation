@@ -385,8 +385,12 @@ public class Histogram {
 	/* 64 COLOR RESOLUTION  */
 	/*----------------------*/
 	
-	public void addToBin64(int color)
+	public int addToBin64(int color)
 	{
+		//early return with a zero to signify improper function call
+		if(colorResFlag != COLOR_RES_64)
+			return 0;
+		
 		colors = new int[64][64][64];
 		bins  = new int[64][64][64];
 		
@@ -404,12 +408,103 @@ public class Histogram {
 		bins[r][g][b]++;
 		colors[r][g][b] += offset;
 		
+		return 1;
+		
 	}
 	
 	//Named and used specifically for when dealing with 64 colors in r/g/b
-	public void calcAverageBinColor64()
+	public int calcAverageBinColor64()
 	{
+		if(colorResFlag != COLOR_RES_64)
+			return 0;
 		
+		//using a single value to traverse matrix with single loop
+		for(int x = 0; x < 64; x++)
+		{
+			for(int y = 0; y < 64; y++)
+			{
+				for(int z = 0; z < 64; z++)
+				{
+					if(bins[x][y][z] != 0)
+					{
+						int c = colors[x][y][z] / bins[x][y][z]; //get the average offset
+						
+						//find the top left color for this group of bins.
+						int base_color = ((x * 4)) + ((y * 4) << 8) + ((z * 4)  << 16);
+						
+						//get the offsets for each color
+						int b = c / 16; //find the plane of the 3d offset matrix
+						int g = b / 4; //find the row within the offset plane
+						int r = b % 4; //find the column within the offset plane
+						
+						//add average offsets into the base
+						base_color += r + (g << 8) + (b << 16);
+						
+						//set it back into the array;
+						colors[x][y][z] = base_color;
+					}
+				}
+			}
+		}
+		
+		return 1;
+	}
+	
+	public int fullSortColors64()
+	{
+		//color resolution check
+		if(colorResFlag != COLOR_RES_64)
+			return 0;
+		
+		sortFlag = 6;
+		
+		for(int z = 0; z < 64; z++)
+		{
+			for(int i = 0; i < 4096; i++)
+			{
+				int temp = bins[i % 64][i / 64][z];
+				int temp_c = colors[i % 64][i / 64][z];
+				int k = i - 1;
+				int l = z;
+				
+				if(k < 0)
+				{
+					k = 4095;
+					l--;
+				}
+				 //it is given in this sorting system that not all data is significant, and we only care about data over a certain threshold
+				while(l > -1 && bins[k % 64][k / 64][l] < temp && temp > 100)
+				{
+					if(k == 4095)
+					{
+						bins[0][0][l + 1] = bins[63][63][l];
+						colors[0][0][l + 1] = colors[63][63][l];
+						
+						bins[63][63][l] = temp;
+						colors[63][63][l] = temp_c;
+					}
+					else
+					{
+						bins[(k + 1) % 64][(k + 1) / 64][l] = bins[k % 64][k / 64][l];
+						colors[(k + 1) % 64][(k + 1) / 64][l] = colors[k % 64][k / 64][l];
+						
+						bins[k % 64][k / 64][l] = temp;
+						colors[k % 64][k / 64][l] = temp_c;
+					}
+					
+					k--;
+					
+					if(k < 0)
+					{
+						k = 4095;
+						l--;
+					}
+					
+				}
+			}
+		}
+		
+		return 1;
 	}
 	
 	
