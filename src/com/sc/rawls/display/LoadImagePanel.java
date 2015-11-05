@@ -12,6 +12,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 
+import com.sc.rawls.data.Histogram;
 import com.sc.rawls.main.Histogrammer;
 
 @SuppressWarnings("serial")
@@ -84,17 +85,30 @@ public class LoadImagePanel extends JPanel implements ActionListener{
 		{
 			if(!path.equals("") && !s_path.equals(""))
 			{
+				int c_res;
 				int selection = 0;
 				if(r.isSelected())
+				{
 					selection = 1;
+					c_res = Histogram.COLOR_RES_256;
+				}
 				else if(g.isSelected())
+				{
 					selection = 2;
+					c_res = Histogram.COLOR_RES_256;
+				}
 				else if(b.isSelected())
+				{
 					selection = 3;
+					c_res = Histogram.COLOR_RES_256;
+				}
 				else
+				{
 					selection = 4;
+					c_res = Histogram.COLOR_RES_256;
+				}
 				System.out.println("Starting Image Read");
-				Histogrammer.readAndSortImage(path, s_path,selection);
+				Histogrammer.readAndSortImage(path, s_path,selection,c_res);
 			}
 		}
 		

@@ -9,9 +9,19 @@ public class Histogram {
 	
 	private int sortFlag = 0;
 	
+	//used to avoid functions that are expecting a certain array size
+	private int colorResFlag;
 	
-	public Histogram()
+	public static final int COLOR_RES_256 = 0;
+	public static final int COLOR_RES_64 = 1;
+	public static final int COLOR_RES_32 = 2;
+	public static final int COLOR_RES_16 = 3;
+	
+	
+	public Histogram(int crf)
 	{
+		
+		colorResFlag = crf;
 		//init the matrix with 0s
 		for(int i = 0; i < 256; i++)
 		{
@@ -55,21 +65,50 @@ public class Histogram {
 		}
 	}
 	
+	//placed here since it is not expecting an array of a predetermined size
+	private void sortSigArrays()
+	{
+		for(int i = 1; i < sig_bins.length - 1; i++)
+		{
+			int temp = sig_bins[i];
+			int temp_c = sig_colors[i];
+			
+			for(int j = i - 1; j >= 0 && temp > sig_bins[j]; j--)
+			{
+				sig_bins[j + 1] = sig_bins[j];
+				sig_colors[j + 1] = sig_colors[j];
+				sig_bins[j] = temp;
+				sig_colors[j] = temp_c;
+			}
+		}
+	}
+	
+	
+	/* Functions Below this are grouped by the number of values per color channel. */
 	
 	/*-------------------------------*/
 	/* STANDARD 256 COLOR RESOLUTION */
 	/*-------------------------------*/
-	public void addToBin(int data)
+	public int addToBin(int data)
 	{
+		//Avoid misplaced calls
+		if(colorResFlag != 0)
+			return 0;
+		
 		int r_val = data & 0xFF;
 		int g_val = (data >> 8) & 0xFF;
 		int b_val = (data >> 16) & 0xFF;
 		
 		bins[r_val][g_val][b_val]++;
+		
+		return 1;
 	}
 	
 	public int blueMergeSortBins()
 	{
+		if(colorResFlag != 0)
+			return 0;
+		
 		sortFlag = 1;
 		//first sort all blue rows in z dim
 		for(int i = 0; i < 65536; i++)
@@ -113,6 +152,10 @@ public class Histogram {
 	
 	public int greenMergeSortBins()
 	{
+		
+		if(colorResFlag != 0)
+			return 0;
+		
 		sortFlag = 2;
 		
 		//First sort the green dimension
@@ -157,6 +200,9 @@ public class Histogram {
 	
 	public int redMergeSortBins()
 	{
+		if(colorResFlag != 0)
+			return 0;
+		
 		sortFlag = 2;
 		
 		//First sort the red dimension
@@ -208,8 +254,12 @@ public class Histogram {
 		return 1;
 	}
 	
+	/* Disabled for how slow it is
 	public int accurateSortBins()
 	{
+		if(colorResFlag != 0)
+			return 0;
+		
 		sortFlag = 4;
 		
 		for(int j = 0; j < 256; j++) //z loop
@@ -265,9 +315,13 @@ public class Histogram {
 		
 		return 1;
 	}
+	*/
 	
 	public int quickAccurateSort()
 	{
+		if(colorResFlag != 0)
+			return 0;
+		
 		sortFlag = 5;
 		sig_bins = new int[512];
 		sig_colors = new int[512];
@@ -326,23 +380,6 @@ public class Histogram {
 		return 1;
 	}
 	
-	public void sortSigArrays()
-	{
-		for(int i = 1; i < sig_bins.length - 1; i++)
-		{
-			int temp = sig_bins[i];
-			int temp_c = sig_colors[i];
-			
-			for(int j = i - 1; j >= 0 && temp > sig_bins[j]; j--)
-			{
-				sig_bins[j + 1] = sig_bins[j];
-				sig_colors[j + 1] = sig_colors[j];
-				sig_bins[j] = temp;
-				sig_colors[j] = temp_c;
-			}
-		}
-	}
-	
 	
 	/*----------------------*/
 	/* 64 COLOR RESOLUTION  */
@@ -369,6 +406,16 @@ public class Histogram {
 		
 	}
 	
+	//Named and used specifically for when dealing with 64 colors in r/g/b
+	public void calcAverageBinColor64()
+	{
+		
+	}
+	
+	
+	/*--------------------------------*/
+	/*    DATA OUTPUT FUNCTIONS       */
+	/*--------------------------------*/
 	
 	
 	public int[][] getSortedArray()

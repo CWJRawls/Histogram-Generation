@@ -59,7 +59,7 @@ public class Histogrammer {
 		frame.setVisible(true);
 	}
 	
-	public static void readAndSortImage(String path, String s_path, int s_method)
+	public static void readAndSortImage(String path, String s_path, int s_method, int c_res)
 	{
 		System.out.println(frame.getComponentCount());
 		frame.remove(lip);
@@ -71,7 +71,7 @@ public class Histogrammer {
 		
 		BufferedImage img = null;
 		System.out.println("Reading Image");
-		Histogram h = new Histogram();
+		Histogram h = new Histogram(c_res);
 		
 		System.out.println("Entering Try block");
 		try{
