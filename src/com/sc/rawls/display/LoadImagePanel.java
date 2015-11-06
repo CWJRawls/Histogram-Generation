@@ -20,7 +20,7 @@ public class LoadImagePanel extends JPanel implements ActionListener{
 
 	String path, s_path;
 	JButton but, but1, buts;
-	JRadioButton r,g,b,a,b64_1,b64_2;
+	JRadioButton r,g,b,a,b64_1,b64_2,b32_1,b32_2;
 	ButtonGroup rg;
 	//JLabel status;
 	
@@ -42,12 +42,16 @@ public class LoadImagePanel extends JPanel implements ActionListener{
 		a = new JRadioButton("Full Precision Sort (Res-256) (Slow)");
 		b64_1 = new JRadioButton("Top 64 Colors (Res-64)");
 		b64_2 = new JRadioButton("Top 256 Color (Res-64)");
+		b32_1 = new JRadioButton("Top 64 Colors (Res-32");
+		b32_2 = new JRadioButton("Top 256 Color (Res-32)");
 		r.setLocation(new Point(5, 80));
 		g.setLocation(new Point(5, 95));
 		b.setLocation(new Point(5, 110));
 		a.setLocation(new Point(5, 125));
 		b64_1.setLocation(5, 140);
 		b64_2.setLocation(5, 155);
+		b32_1.setLocation(5, 170);
+		b32_2.setLocation(5, 185);
 		JLabel label = new JLabel("Sorting Method");
 		label.setLocation(5, 75);
 		//JLabel status = new JLabel("No Image Selected");
@@ -60,6 +64,8 @@ public class LoadImagePanel extends JPanel implements ActionListener{
 		rg.add(a);
 		rg.add(b64_1);
 		rg.add(b64_2);
+		rg.add(b32_1);
+		rg.add(b32_2);
 		this.add(but);
 		this.add(buts);
 		this.add(label);
@@ -69,6 +75,8 @@ public class LoadImagePanel extends JPanel implements ActionListener{
 		this.add(a);
 		this.add(b64_1);
 		this.add(b64_2);
+		this.add(b32_1);
+		this.add(b32_2);
 		//this.add(status);
 		this.add(but1);
 	}
@@ -120,11 +128,22 @@ public class LoadImagePanel extends JPanel implements ActionListener{
 					selection = 5;
 					c_res = Histogram.COLOR_RES_64;
 				}
-				else
+				else if(b64_2.isSelected())
 				{
 					selection = 6;
 					c_res = Histogram.COLOR_RES_64;
 				}
+				else if(b32_1.isSelected())
+				{
+					selection = 7;
+					c_res = Histogram.COLOR_RES_32;
+				}
+				else
+				{
+					selection = 8;
+					c_res = Histogram.COLOR_RES_32;
+				}
+				
 				System.out.println("Starting Image Read");
 				Histogrammer.readAndSortImage(path, s_path,selection,c_res);
 			}

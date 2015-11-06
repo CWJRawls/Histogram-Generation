@@ -620,7 +620,372 @@ public class Histogram {
 	
 	
 	/*--------------------------------*/
-	/*    DATA OUTPUT FUNCTIONS       */
+	/*      32 COLOR RESOLUTION       */
+	/*--------------------------------*/
+	
+	public int addToBin32(int data)
+	{
+		if(colorResFlag != COLOR_RES_32)
+			return 0;
+		
+		
+		sortFlag = 8;
+		/* Offset values run 0 - 512 for each bin */
+		int r = 0xFF & data;
+		int g = (data >> 8) & 0xFF;
+		int b = (data >> 16) & 0xFF;
+		
+		int offset = (r % 8) + ((g % 8) * 8) + ((b % 8) * 64);
+		
+		r /= 8;
+		g /= 8;
+		b /= 8;
+		
+		bins[r][g][b]++;
+		colors[r][g][b] += offset;
+		
+		return 1;
+	}
+	
+	public int calcAverageBinColor32()
+	{
+		//color resolution check
+		if(colorResFlag != COLOR_RES_32)
+			return 0;
+		
+		for(int x = 0; x < 32; x++)
+		{
+			for(int y = 0; y < 32; y++)
+			{
+				for(int z = 0; z < 32; z++)
+				{
+					if(bins[x][y][z] != 0)
+					{
+						int base_color = (x * 8) + ((y * 8) << 8) + ((z * 8) << 16);
+						
+						int c = colors[x][y][z] / bins[x][y][z];
+						
+						int b = c / 64;
+						int g = (c - (b * 64)) / 8;
+						int r = (c - (b * 64)) % 8;
+						
+						base_color += r + (g << 8) + (b << 16);
+						
+						colors[x][y][z] = base_color;
+					}
+				}
+			}
+		}
+		
+		return 1;
+	}
+	
+	public int fullSortColors32()
+	{
+		if(colorResFlag != COLOR_RES_32)
+			return 0;
+		
+		sortFlag = 8;
+		
+		for(int z = 0; z < 32; z++)
+		{
+			for(int i = 0; i < 1024; i++)
+			{
+				int k = i - 1;
+				int l = z;
+				
+				int temp = bins[i % 32][i / 32][l];
+				int temp_c = colors[i % 32][i / 32][l];
+				
+				if(k < 0)
+				{
+					k = 1023;
+					l--;
+				}
+				
+				while(l > -1 && bins[k % 32][k / 32][l] < temp && temp > 100)
+				{
+					if(k == 1023)
+					{
+						bins[0][0][l + 1] = bins[31][31][l];
+						colors[0][0][l + 1] = colors[31][31][l];
+						
+						bins[31][31][l] = temp;
+						colors[31][31][l] = temp_c;
+					}
+					else
+					{
+						bins[(k + 1) % 32][(k + 1) / 32][l] = bins[k % 32][k / 32][l];
+						colors[(k + 1) % 32][(k + 1) / 32][l] = colors[k % 32][k / 32][l];
+						
+						bins[k % 32][k / 32][l] = temp;
+						colors[k % 32][k / 32][l] = temp_c;
+					}
+					
+					k--;
+					
+					if(k < 0)
+					{
+						k = 1023;
+						l--;
+					}
+					
+				}
+			}
+		}
+		
+		return 1;
+	}
+	
+	//sorts though all the bins and returns a sorted list of the top 256 values (over the specified threshold)
+	public int bin256Sort32()
+	{
+		//color resolution check
+		if(colorResFlag != COLOR_RES_32)
+			return 0;
+			
+		System.out.print("Sorting Data");
+		//set the sorting flag to avoid trying to return the incorrect values
+		sortFlag = 9;
+		int head = 0;
+		initSigArrays(256);
+		
+		for(int x = 0; x < 32; x++)
+		{
+			for(int y = 0; y < 32; y++)
+			{
+				for(int z = 0; z < 32; z++)
+				{
+					/*
+					//printing methods
+					if(x % 4 == 0)
+						System.out.print("#");
+					if(y / 63 == 1)
+						System.out.println(""); */
+						
+					if(bins[x][y][z] > 100)
+					{
+						//if we have not yet filled the array of significant values
+						if(head < sig_bins.length - 1)
+						{
+							sig_bins[head] = bins[x][y][z];
+							sig_colors[head] = colors[x][y][z];
+							
+							head++;
+								
+							//if that value filled the array, then sort them
+							if(head == sig_bins.length - 1)
+							{
+								sortSigArrays();
+							}
+						}
+						//if the array is full, but this value is more significant
+						else if(head == sig_bins.length - 1 && bins[x][y][z] > sig_bins[head])
+						{
+							sig_bins[head] = bins[x][y][z];
+							sig_colors[head] = colors[x][y][z];
+								
+							//sort to make sure the the color of lowest occurence is always at the end.
+							sortSigArrays();
+						}
+					}
+				}
+			}
+		}
+			
+		//if for seom reason we did not fill the entire array, then sort before returning
+		if(head < sig_bins.length - 1)
+		{
+			sortSigArrays();
+		}
+			
+		return 1;
+	}
+	
+	/*--------------------------------*/
+	/*     16 COLOR RESOLUTION        */
+	/*--------------------------------*/
+	public int addToBin16(int data)
+	{
+		if(colorResFlag != COLOR_RES_16)
+			return 0;
+		
+		
+		sortFlag = 8;
+		/* Offset values run 0 - 512 for each bin */
+		int r = 0xFF & data;
+		int g = (data >> 8) & 0xFF;
+		int b = (data >> 16) & 0xFF;
+		
+		int offset = (r % 16) + ((g % 16) * 16) + ((b % 8) * 256);
+		
+		r /= 16;
+		g /= 16;
+		b /= 16;
+		
+		bins[r][g][b]++;
+		colors[r][g][b] += offset;
+		
+		return 1;
+	}
+	
+	public int calcAverageBinColor16()
+	{
+		//color resolution check
+		if(colorResFlag != COLOR_RES_16)
+			return 0;
+		
+		for(int x = 0; x < 32; x++)
+		{
+			for(int y = 0; y < 32; y++)
+			{
+				for(int z = 0; z < 32; z++)
+				{
+					if(bins[x][y][z] != 0)
+					{
+						int base_color = (x * 8) + ((y * 8) << 8) + ((z * 8) << 16);
+						
+						int c = colors[x][y][z] / bins[x][y][z];
+						
+						int b = c / 64;
+						int g = (c - (b * 64)) / 8;
+						int r = (c - (b * 64)) % 8;
+						
+						base_color += r + (g << 8) + (b << 16);
+						
+						colors[x][y][z] = base_color;
+					}
+				}
+			}
+		}
+		
+		return 1;
+	}
+	
+	public int fullSortColors16()
+	{
+		if(colorResFlag != COLOR_RES_16)
+			return 0;
+		
+		sortFlag = 8;
+		
+		for(int z = 0; z < 32; z++)
+		{
+			for(int i = 0; i < 1024; i++)
+			{
+				int k = i - 1;
+				int l = z;
+				
+				int temp = bins[i % 32][i / 32][l];
+				int temp_c = colors[i % 32][i / 32][l];
+				
+				if(k < 0)
+				{
+					k = 1023;
+					l--;
+				}
+				
+				while(l > -1 && bins[k % 32][k / 32][l] < temp && temp > 100)
+				{
+					if(k == 1023)
+					{
+						bins[0][0][l + 1] = bins[31][31][l];
+						colors[0][0][l + 1] = colors[31][31][l];
+						
+						bins[31][31][l] = temp;
+						colors[31][31][l] = temp_c;
+					}
+					else
+					{
+						bins[(k + 1) % 32][(k + 1) / 32][l] = bins[k % 32][k / 32][l];
+						colors[(k + 1) % 32][(k + 1) / 32][l] = colors[k % 32][k / 32][l];
+						
+						bins[k % 32][k / 32][l] = temp;
+						colors[k % 32][k / 32][l] = temp_c;
+					}
+					
+					k--;
+					
+					if(k < 0)
+					{
+						k = 1023;
+						l--;
+					}
+					
+				}
+			}
+		}
+		
+		return 1;
+	}
+	
+	//sorts though all the bins and returns a sorted list of the top 256 values (over the specified threshold)
+	public int bin256Sort16()
+	{
+		//color resolution check
+		if(colorResFlag != COLOR_RES_16)
+			return 0;
+			
+		System.out.print("Sorting Data");
+		//set the sorting flag to avoid trying to return the incorrect values
+		sortFlag = 9;
+		int head = 0;
+		initSigArrays(256);
+		
+		for(int x = 0; x < 32; x++)
+		{
+			for(int y = 0; y < 32; y++)
+			{
+				for(int z = 0; z < 32; z++)
+				{
+					/*
+					//printing methods
+					if(x % 4 == 0)
+						System.out.print("#");
+					if(y / 63 == 1)
+						System.out.println(""); */
+						
+					if(bins[x][y][z] > 100)
+					{
+						//if we have not yet filled the array of significant values
+						if(head < sig_bins.length - 1)
+						{
+							sig_bins[head] = bins[x][y][z];
+							sig_colors[head] = colors[x][y][z];
+							
+							head++;
+								
+							//if that value filled the array, then sort them
+							if(head == sig_bins.length - 1)
+							{
+								sortSigArrays();
+							}
+						}
+						//if the array is full, but this value is more significant
+						else if(head == sig_bins.length - 1 && bins[x][y][z] > sig_bins[head])
+						{
+							sig_bins[head] = bins[x][y][z];
+							sig_colors[head] = colors[x][y][z];
+								
+							//sort to make sure the the color of lowest occurence is always at the end.
+							sortSigArrays();
+						}
+					}
+				}
+			}
+		}
+			
+		//if for seom reason we did not fill the entire array, then sort before returning
+		if(head < sig_bins.length - 1)
+		{
+			sortSigArrays();
+		}
+			
+		return 1;
+	}
+		
+	/*--------------------------------*/
+	/*      DATA OUTPUT FUNCTIONS     */
 	/*--------------------------------*/
 	
 	//Programmers should be wary of 0 returns from sort functions and avoid calling this function in that case
@@ -677,6 +1042,22 @@ public class Histogram {
 		else if(sortFlag == 7)
 		{
 			//return the top 256 colors
+			output = new int[256][1];
+			for(int i = 0; i < 256; i++)
+			{
+				output[i][0] = sig_colors[i];
+			}
+		}
+		else if(sortFlag == 8)
+		{
+			output = new int[64][1];
+			for(int i = 0; i < 64; i++)
+			{
+				output[i][0] = colors[i % 32][i / 32][0];
+			}
+		}
+		else if(sortFlag == 9)
+		{
 			output = new int[256][1];
 			for(int i = 0; i < 256; i++)
 			{

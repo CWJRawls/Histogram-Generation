@@ -89,6 +89,8 @@ public class Histogrammer {
 					h.addToBin(data[i]);
 				else if(c_res == Histogram.COLOR_RES_64)
 					h.addToBin64(data[i]);
+				else if(c_res == Histogram.COLOR_RES_32)
+					h.addToBin32(data[i]);
 				
 				if(i % 20 == 0)
 				{
@@ -102,6 +104,8 @@ public class Histogrammer {
 			
 			if(c_res == Histogram.COLOR_RES_64)
 				h.calcAverageBinColor64();
+			else if(c_res == Histogram.COLOR_RES_32)
+				h.calcAverageBinColor32();
 			
 			System.out.println("Beginning data sorting");
 			int done = 0;
@@ -115,8 +119,12 @@ public class Histogrammer {
 				done = h.quickAccurateSort();
 			else if(s_method == 5)
 				done = h.fullSortColors64();
-			else
+			else if(s_method == 6)
 				done = h.bin256Sort64();
+			else if(s_method == 7)
+				done = h.fullSortColors32();
+			else
+				done = h.bin256Sort32();
 			
 			if(done == 1)
 			{
