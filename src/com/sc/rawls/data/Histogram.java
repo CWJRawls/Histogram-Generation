@@ -835,21 +835,21 @@ public class Histogram {
 		if(colorResFlag != COLOR_RES_16)
 			return 0;
 		
-		for(int x = 0; x < 32; x++)
+		for(int x = 0; x < 16; x++)
 		{
-			for(int y = 0; y < 32; y++)
+			for(int y = 0; y < 16; y++)
 			{
-				for(int z = 0; z < 32; z++)
+				for(int z = 0; z < 16; z++)
 				{
 					if(bins[x][y][z] != 0)
 					{
-						int base_color = (x * 8) + ((y * 8) << 8) + ((z * 8) << 16);
+						int base_color = (x * 16) + ((y * 16) << 8) + ((z * 16) << 16);
 						
 						int c = colors[x][y][z] / bins[x][y][z];
 						
-						int b = c / 64;
-						int g = (c - (b * 64)) / 8;
-						int r = (c - (b * 64)) % 8;
+						int b = c / 256;
+						int g = (c - (b * 256)) / 16;
+						int r = (c - (b * 256)) % 16;
 						
 						base_color += r + (g << 8) + (b << 16);
 						
@@ -867,48 +867,48 @@ public class Histogram {
 		if(colorResFlag != COLOR_RES_16)
 			return 0;
 		
-		sortFlag = 8;
+		sortFlag = 10;
 		
-		for(int z = 0; z < 32; z++)
+		for(int z = 0; z < 16; z++)
 		{
-			for(int i = 0; i < 1024; i++)
+			for(int i = 0; i < 256; i++)
 			{
 				int k = i - 1;
 				int l = z;
 				
-				int temp = bins[i % 32][i / 32][l];
-				int temp_c = colors[i % 32][i / 32][l];
+				int temp = bins[i % 16][i / 16][l];
+				int temp_c = colors[i % 16][i / 16][l];
 				
 				if(k < 0)
 				{
-					k = 1023;
+					k = 255;
 					l--;
 				}
 				
-				while(l > -1 && bins[k % 32][k / 32][l] < temp && temp > 100)
+				while(l > -1 && bins[k % 16][k / 16][l] < temp && temp > 100)
 				{
-					if(k == 1023)
+					if(k == 255)
 					{
-						bins[0][0][l + 1] = bins[31][31][l];
-						colors[0][0][l + 1] = colors[31][31][l];
+						bins[0][0][l + 1] = bins[15][15][l];
+						colors[0][0][l + 1] = colors[15][15][l];
 						
-						bins[31][31][l] = temp;
-						colors[31][31][l] = temp_c;
+						bins[15][15][l] = temp;
+						colors[15][15][l] = temp_c;
 					}
 					else
 					{
-						bins[(k + 1) % 32][(k + 1) / 32][l] = bins[k % 32][k / 32][l];
-						colors[(k + 1) % 32][(k + 1) / 32][l] = colors[k % 32][k / 32][l];
+						bins[(k + 1) % 16][(k + 1) / 16][l] = bins[k % 16][k / 16][l];
+						colors[(k + 1) % 16][(k + 1) / 16][l] = colors[k % 16][k / 16][l];
 						
-						bins[k % 32][k / 32][l] = temp;
-						colors[k % 32][k / 32][l] = temp_c;
+						bins[k % 16][k / 16][l] = temp;
+						colors[k % 16][k / 16][l] = temp_c;
 					}
 					
 					k--;
 					
 					if(k < 0)
 					{
-						k = 1023;
+						k = 255;
 						l--;
 					}
 					
@@ -928,15 +928,15 @@ public class Histogram {
 			
 		System.out.print("Sorting Data");
 		//set the sorting flag to avoid trying to return the incorrect values
-		sortFlag = 9;
+		sortFlag = 11;
 		int head = 0;
 		initSigArrays(256);
 		
-		for(int x = 0; x < 32; x++)
+		for(int x = 0; x < 16; x++)
 		{
-			for(int y = 0; y < 32; y++)
+			for(int y = 0; y < 16; y++)
 			{
-				for(int z = 0; z < 32; z++)
+				for(int z = 0; z < 16; z++)
 				{
 					/*
 					//printing methods
