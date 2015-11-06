@@ -43,7 +43,7 @@ public class Histogrammer {
 		frame.remove(mp);
 		frame.setVisible(false);
 		frame.add(lip);
-		frame.setPreferredSize(new Dimension(250, 375));
+		frame.setPreferredSize(new Dimension(250, 425));
 		frame.pack();
 		frame.setVisible(true);
 		//System.out.println("Number of components: " + frame.getComponentCount());
@@ -54,7 +54,7 @@ public class Histogrammer {
 		frame.remove(ep);
 		frame.setVisible(false);
 		frame.add(lip);
-		frame.setPreferredSize(new Dimension(250, 375));
+		frame.setPreferredSize(new Dimension(250, 425));
 		frame.pack();
 		frame.setVisible(true);
 	}
@@ -159,7 +159,7 @@ public class Histogrammer {
 		frame.setVisible(false);
 		frame.remove(pp);
 		frame.add(lip);
-		frame.setPreferredSize(new Dimension(250, 375));
+		frame.setPreferredSize(new Dimension(250, 425));
 		frame.pack();
 		frame.setVisible(true);
 	}

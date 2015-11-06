@@ -20,7 +20,7 @@ public class LoadImagePanel extends JPanel implements ActionListener{
 
 	String path, s_path;
 	JButton but, but1, buts;
-	JRadioButton r,g,b,a,b64_1,b64_2,b32_1,b32_2;
+	JRadioButton r,g,b,a,b64_1,b64_2,b32_1,b32_2,b16_1,b16_2;
 	ButtonGroup rg;
 	//JLabel status;
 	
@@ -43,7 +43,9 @@ public class LoadImagePanel extends JPanel implements ActionListener{
 		b64_1 = new JRadioButton("Top 64 Colors (Res-64)");
 		b64_2 = new JRadioButton("Top 256 Color (Res-64)");
 		b32_1 = new JRadioButton("Top 64 Colors (Res-32");
-		b32_2 = new JRadioButton("Top 256 Color (Res-32)");
+		b32_2 = new JRadioButton("Top 256 Colors (Res-32)");
+		b16_1 = new JRadioButton("Top 64 Colors (Res-16)");
+		b16_2 = new JRadioButton("Top 256 Colors (Res-16)");
 		r.setLocation(new Point(5, 80));
 		g.setLocation(new Point(5, 95));
 		b.setLocation(new Point(5, 110));
@@ -52,6 +54,8 @@ public class LoadImagePanel extends JPanel implements ActionListener{
 		b64_2.setLocation(5, 155);
 		b32_1.setLocation(5, 170);
 		b32_2.setLocation(5, 185);
+		b16_1.setLocation(5, 200);
+		b16_2.setLocation(5, 215);
 		JLabel label = new JLabel("Sorting Method");
 		label.setLocation(5, 75);
 		//JLabel status = new JLabel("No Image Selected");
@@ -66,6 +70,8 @@ public class LoadImagePanel extends JPanel implements ActionListener{
 		rg.add(b64_2);
 		rg.add(b32_1);
 		rg.add(b32_2);
+		rg.add(b16_1);
+		rg.add(b16_2);
 		this.add(but);
 		this.add(buts);
 		this.add(label);
@@ -77,6 +83,8 @@ public class LoadImagePanel extends JPanel implements ActionListener{
 		this.add(b64_2);
 		this.add(b32_1);
 		this.add(b32_2);
+		this.add(b16_1);
+		this.add(b16_2);
 		//this.add(status);
 		this.add(but1);
 	}
@@ -138,10 +146,20 @@ public class LoadImagePanel extends JPanel implements ActionListener{
 					selection = 7;
 					c_res = Histogram.COLOR_RES_32;
 				}
-				else
+				else if(b32_2.isSelected())
 				{
 					selection = 8;
 					c_res = Histogram.COLOR_RES_32;
+				}
+				else if(b16_1.isSelected())
+				{
+					selection = 9;
+					c_res = Histogram.COLOR_RES_16;
+				}
+				else
+				{
+					selection = 10;
+					c_res = Histogram.COLOR_RES_16;
 				}
 				
 				System.out.println("Starting Image Read");

@@ -1064,6 +1064,22 @@ public class Histogram {
 				output[i][0] = sig_colors[i];
 			}
 		}
+		else if(sortFlag == 10)
+		{
+			output = new int[64][1];
+			for(int i = 0; i < 64; i++)
+			{
+				output[i][0] = colors[i % 16][i / 16][0];
+			}
+		}
+		else if(sortFlag == 11)
+		{
+			output = new int[256][1];
+			for(int i = 0; i < 256; i++)
+			{
+				output[i][0] = sig_colors[i];
+			}
+		}
 		else
 		{
 			for(int i = 0; i < 65536; i++)
