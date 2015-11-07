@@ -93,6 +93,7 @@ public class Histogram {
 		}
 	}
 	
+	//utility function to initialize main arrays to correct size for color resolution
 	private void initMatrices(int dim, int color_init)
 	{
 		bins = new int[dim][dim][dim];
@@ -112,6 +113,27 @@ public class Histogram {
 				}
 			}
 		}
+	}
+	
+	//utility function to compare whether a color is outside a threshold
+	private boolean isDifferent(int control, int source, int delta)
+	{
+		int ar = 0xFF & control;
+		int ag = 0xFF & (control >> 8);
+		int ab = 0xFF & (control >> 16);
+		
+		int br = 0xFF & source;
+		int bg = 0xFF & (source >> 8);
+		int bb = 0xFF & (source >> 16);
+		
+		int dr = Math.abs(ar - br);
+		int dg = Math.abs(ag - bg);
+		int db = Math.abs(ab - bb);
+		
+		if(dr < delta && dg < delta && db < delta)
+			return false;
+		else
+			return true;
 	}
 	
 	
@@ -370,32 +392,35 @@ public class Histogram {
 			{
 				for(int x = 0; x < 256; x++)
 				{
-					if(bins[x][y][z] >= 100)
+					if(bins[x][y][z] > 10)
 					{
-						System.out.println("Significant data at " + x + "|" + y + "|" + z);
-						if(head < sig_bins.length - 1)
+						boolean unique = true;
+						for(int i = 0; i < sig_bins.length && sig_bins[i] != 0 && unique; i++)
 						{
-							//add to the open index
+							unique = isDifferent(sig_colors[i], colors[x][y][z], 32);
+						}
+						//if we have not yet filled the array of significant values
+						if(head < sig_bins.length - 1 && unique)
+						{
 							sig_bins[head] = bins[x][y][z];
 							sig_colors[head] = colors[x][y][z];
-							//increment head variable
+							
 							head++;
-							//if we are at the last index, then sort the array
+								
+							//if that value filled the array, then sort them
 							if(head == sig_bins.length - 1)
 							{
 								sortSigArrays();
 							}
 						}
-						else if(head == sig_bins.length - 1 && bins[x][y][z] > sig_bins[sig_bins.length - 1])
+						//if the array is full, but this value is more significant
+						else if(head == sig_bins.length - 1 && bins[x][y][z] > sig_bins[head] && unique)
 						{
-							sig_bins[sig_bins.length - 1] = bins[x][y][z];
-							sig_colors[sig_bins.length - 1] = colors[x][y][z];
-							
+							sig_bins[head] = bins[x][y][z];
+							sig_colors[head] = colors[x][y][z];
+								
+							//sort to make sure the the color of lowest occurence is always at the end.
 							sortSigArrays();
-						}
-						else
-						{
-							System.out.println("Data Not Large Enough for list");
 						}
 					}
 				}
@@ -579,16 +604,21 @@ public class Histogram {
 					if(y / 63 == 1)
 						System.out.println(""); */
 					
-					if(bins[x][y][z] > 100)
+					if(bins[x][y][z] > 10)
 					{
+						boolean unique = true;
+						for(int i = 0; i < sig_bins.length && sig_bins[i] != 0 && unique; i++)
+						{
+							unique = isDifferent(sig_colors[i], colors[x][y][z], 32);
+						}
 						//if we have not yet filled the array of significant values
-						if(head < sig_bins.length - 1)
+						if(head < sig_bins.length - 1 && unique)
 						{
 							sig_bins[head] = bins[x][y][z];
 							sig_colors[head] = colors[x][y][z];
 							
 							head++;
-							
+								
 							//if that value filled the array, then sort them
 							if(head == sig_bins.length - 1)
 							{
@@ -596,11 +626,11 @@ public class Histogram {
 							}
 						}
 						//if the array is full, but this value is more significant
-						else if(head == sig_bins.length - 1 && bins[x][y][z] > sig_bins[head])
+						else if(head == sig_bins.length - 1 && bins[x][y][z] > sig_bins[head] && unique)
 						{
 							sig_bins[head] = bins[x][y][z];
 							sig_colors[head] = colors[x][y][z];
-							
+								
 							//sort to make sure the the color of lowest occurence is always at the end.
 							sortSigArrays();
 						}
@@ -763,10 +793,15 @@ public class Histogram {
 					if(y / 63 == 1)
 						System.out.println(""); */
 						
-					if(bins[x][y][z] > 100)
+					if(bins[x][y][z] > 10)
 					{
+						boolean unique = true;
+						for(int i = 0; i < sig_bins.length && sig_bins[i] != 0 && unique; i++)
+						{
+							unique = isDifferent(sig_colors[i], colors[x][y][z], 32);
+						}
 						//if we have not yet filled the array of significant values
-						if(head < sig_bins.length - 1)
+						if(head < sig_bins.length - 1 && unique)
 						{
 							sig_bins[head] = bins[x][y][z];
 							sig_colors[head] = colors[x][y][z];
@@ -780,7 +815,7 @@ public class Histogram {
 							}
 						}
 						//if the array is full, but this value is more significant
-						else if(head == sig_bins.length - 1 && bins[x][y][z] > sig_bins[head])
+						else if(head == sig_bins.length - 1 && bins[x][y][z] > sig_bins[head] && unique)
 						{
 							sig_bins[head] = bins[x][y][z];
 							sig_colors[head] = colors[x][y][z];

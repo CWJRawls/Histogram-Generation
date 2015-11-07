@@ -16,7 +16,7 @@ public class MainPanel extends JPanel implements ActionListener{
 	public MainPanel()
 	{
 		but = new JButton();
-		but.setText("Load Image");
+		but.setText("Start");
 		but.setSize(195, 60);
 		but.addActionListener(this);
 		this.add(but);
