@@ -1125,4 +1125,13 @@ public class Histogram {
 		
 		return output;
 	}
+	
+	public int getBinAt(int x)
+	{
+		
+		if(x > sig_bins.length || x < 0)
+			return -1;
+		else
+			return sig_bins[x];
+	}
 }
