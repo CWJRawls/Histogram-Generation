@@ -16,6 +16,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 
+import com.sc.rawls.data.Gradient;
 import com.sc.rawls.data.Histogram;
 import com.sc.rawls.main.Histogrammer;
 
@@ -157,10 +158,18 @@ public class LoadImagePanel extends JPanel implements ActionListener{
 				int selection = 0;
 				boolean do_gradient = gradient.isSelected();
 				int steps = stepValue.getSelectedIndex();
-				int feat = feature.getSelectedIndex();
-				feat += (steps << 8);
+				int t_feat = feature.getSelectedIndex();
+				int feat = 0;
 				int rep_size = deltaValue.getSelectedIndex();
 				
+				if(t_feat == 0)
+					feat = Gradient.GRAD_FEATURE_NONE;
+				else if(t_feat == 1)
+					feat = Gradient.GRAD_FEATURE_BLACK;
+				else
+					feat = Gradient.GRAD_FEATURE_WHITE;
+				
+				feat += (steps << 8);
 				
 				
 				/*

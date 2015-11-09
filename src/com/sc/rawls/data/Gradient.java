@@ -48,7 +48,177 @@ public class Gradient {
 		if(base.length == 0)
 			return 0;
 		
+		//get options chosen for the gradient
 		int steps = (gradient_feature >> 8) & 0xFF;
+		int feat = gradient_feature  & 0xFF;
+		
+		//init the array for the final gradient
+		int[] gradient = new int[(base.length + ((base.length - 1) * steps))];
+		
+		if(steps > 0) //Why go through running this if we have no steps?
+		{
+			//if our gradient is drawing a line through the RGB cube
+			if(feat == GRAD_FEATURE_NONE)
+			{
+				for(int i = 0; i < base.length - 1; i++) //we will not calculate anything past the last index
+				{
+					int[] temp = new int[steps + 2];
+					temp[0] = base[i];
+					temp[temp.length - 1] = base[i + 1];
+					
+					float r_shift = ((base[i] & 0xFF) - (base[i + 1] & 0xFF)) / steps;
+					float g_shift = (((base[i] >> 8) & 0xFF) - ((base[i + 1] >> 8) & 0xFF)) / steps;
+					float b_shift = (((base[i] >> 16) & 0xFF) - ((base[i + 1] >> 16) & 0xFF)) / steps;
+					
+					int r = base[i] & 0xFF;
+					int g = (base[i] >> 8) & 0xFF;
+					int b = (base[i] >> 16) & 0xFF;
+					
+					
+					for(int j = 1; j < temp.length - 1; j++)
+					{
+						int t_r = (int)(r + (j * r_shift));
+						int t_g = (int)(g + (j * g_shift));
+						int t_b = (int)(b + (j * b_shift));
+						
+						temp[j] = t_r + (t_g << 8) + (t_b << 16);
+					}
+					
+					for(int j = 0; j < temp.length; j++)
+					{
+						gradient[((i * steps) + i + j)] = temp[j];
+					}
+				}
+			}
+			else if(feat == GRAD_FEATURE_BLACK)
+			{
+				for(int i = 0; i < base.length - 1; i++)
+				{
+					int[] temp = new int[steps + 2];
+					temp[0] = base[i];
+					temp[temp.length - 1] = base[i + 1];
+					
+					float r_shift_a = (base[i] & 0xFF) / (steps / 2);
+					float g_shift_a = ((base[i] >> 8) & 0xFF) / (steps / 2);
+					float b_shift_a = ((base[i] >> 16) & 0xFF) / (steps / 2);
+					
+					float r_shift_b = (base[i + 1] & 0xFF) / (steps / 2);
+					float g_shift_b = ((base[i + 1] >> 8) & 0xFF) / (steps / 2);
+					float b_shift_b = ((base[i + 1] >> 16) & 0xFF) / (steps / 2);
+					
+					int r = base[i] & 0xFF;
+					int g = (base[i] >> 8) & 0xFF;
+					int b = (base[i] >> 16) & 0xFF;
+					
+					int step_check = steps % 2;
+					int median = steps / 2;
+					
+					if(step_check != 0)
+					{
+						median--;
+					}
+					
+					for(int j = 1; j < median; j++)
+					{
+						int t_r = (int)(r - (j * r_shift_a));
+						int t_g = (int)(g - (j * g_shift_a));
+						int t_b = (int)(b - (j * b_shift_a));
+						
+						temp[j] = t_r + (t_g << 8) + (t_b << 16);
+					}
+					
+					r = 0;
+					b = 0;
+					g = 0;
+					
+					for(int j = median; j < steps; j++)
+					{
+						int t_r = (int)(r + ((j - (median - 1)) * r_shift_b));
+						int t_g = (int)(g + ((j - (median - 1)) * g_shift_b));
+						int t_b = (int)(b + ((j - (median - 1)) * b_shift_b));
+						
+						temp[j] = t_r + (t_g << 8) + (t_b << 16);
+					}
+					
+					for(int j = 0; j < temp.length; j++)
+					{
+						gradient[((i * steps) + i + j)] = temp[j];
+					}
+				}
+			}
+			else if(feat == GRAD_FEATURE_WHITE)
+			{
+				for(int i = 0; i < base.length - 1; i++)
+				{
+					int[] temp = new int[steps + 2];
+					temp[0] = base[i];
+					temp[temp.length - 1] = base[i + 1];
+					
+					float r_shift_a = (255 - (base[i] & 0xFF)) / (steps / 2);
+					float g_shift_a = (255 - ((base[i] >> 8) & 0xFF)) / (steps / 2);
+					float b_shift_a = (255 - ((base[i] >> 16) & 0xFF)) / (steps / 2);
+					
+					float r_shift_b = (255 - (base[i + 1] & 0xFF)) / (steps / 2);
+					float g_shift_b = (255 - ((base[i + 1] >> 8) & 0xFF)) / (steps / 2);
+					float b_shift_b = (255 - ((base[i + 1] >> 16) & 0xFF)) / (steps / 2);
+					
+					int r = base[i] & 0xFF;
+					int g = (base[i] >> 8) & 0xFF;
+					int b = (base[i] >> 16) & 0xFF;
+					
+					int step_check = steps % 2;
+					int median = steps / 2;
+					
+					if(step_check != 0)
+					{
+						median--;
+					}
+					
+					for(int j = 1; j < median; j++)
+					{
+						int t_r = (int)(r + (j * r_shift_a));
+						int t_g = (int)(g + (j * g_shift_a));
+						int t_b = (int)(b + (j * b_shift_a));
+						
+						temp[j] = t_r + (t_g << 8) + (t_b << 16);
+					}
+					
+					r = 255;
+					b = 255;
+					g = 255;
+					
+					for(int j = median; j < steps; j++)
+					{
+						int t_r = (int)(r - ((j - (median - 1)) * r_shift_b));
+						int t_g = (int)(g - ((j - (median - 1)) * g_shift_b));
+						int t_b = (int)(b - ((j - (median - 1)) * b_shift_b));
+						
+						temp[j] = t_r + (t_g << 8) + (t_b << 16);
+					}
+					
+					for(int j = 0; j < temp.length; j++)
+					{
+						gradient[((i * steps) + i + j)] = temp[j];
+					}
+				}
+			}
+			else
+			{
+				for(int i = 0; i < gradient.length; i++)
+				{
+					gradient[i] = base[i];
+				}
+			}
+		}
+		else //just copy data to the output array
+		{
+			for(int i = 0; i < gradient.length; i++)
+			{
+				gradient[i] = base[i];
+			}
+		}
+		
+		init_check = true;
 		
 		return 1;
 	}
