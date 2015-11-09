@@ -1,5 +1,4 @@
 TODO
 
-Implement second 64 color res sort mode
-Implement 32 Color Resolution functions
-Implement 16 Color Resolution functions
+Add customizable repetition threshold
+Add customizable sorting significance threshold

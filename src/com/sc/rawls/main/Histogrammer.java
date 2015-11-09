@@ -59,7 +59,7 @@ public class Histogrammer {
 		frame.setVisible(true);
 	}
 	
-	public static void readAndSortImage(String path, String s_path, int s_method, int c_res)
+	public static void readAndSortImage(String path, String s_path, int s_method, int c_res, int rep_size, boolean do_grad, int features)
 	{
 		System.out.println(frame.getComponentCount());
 		frame.remove(lip);

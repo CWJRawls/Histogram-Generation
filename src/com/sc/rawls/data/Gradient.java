@@ -19,10 +19,13 @@ public class Gradient {
 	 */
 	public Gradient(int[] b, int feat, Histogram h)
 	{
+		//set the histogram
 		hist = h;
 		
+		//set the feature value
 		gradient_feature = feat;
 		
+		//initialize the base array
 		base = new int[b.length];
 		
 		for(int i = 0; i < b.length; i++)
@@ -30,17 +33,31 @@ public class Gradient {
 			base[i] = b[i];
 		}
 		
+		//filter out any extra values in the base array and reset it to the correct size
 		removeExtraIndeces();
 	}
 	
+	/*COMPUTE GRADIENT Function
+	 * takes no arguments and returns an integer when done.
+	 * Will use the gradient feature to determine how the gradient between adjacent indeces is calculated.
+	 * If the computation is successful, the gradient array will be filled at the function's conclusion.
+	 */
 	public int computeGradient()
 	{
+		//check to make sure there is data to compute a gradient on
+		if(base.length == 0)
+			return 0;
 		
-		int[] steps = new int[base.length];
+		int steps = (gradient_feature >> 8) & 0xFF;
 		
 		return 1;
 	}
 	
+	/*REMOVE EXTRA INDECES Function
+	 * takes no arguments and is a void return when done.
+	 * Starts at the end of the base array and works towards base[0] to find all values that do not have a bin > 0
+	 * When the loop is complete, and if there were any values of bin == 0, then the base array is reinitialized and refilled with only valid values.
+	 */
 	private void removeExtraIndeces()
 	{
 		int end = base.length;
@@ -72,12 +89,14 @@ public class Gradient {
 		}
 	}
 	
-	public int canGetData()
+	/* CAN GET DATA Function
+	 * takes no arguments and returns a boolean value
+	 * returns the value of init_check flag
+	 * Should be called before asking for gradient data
+	 */
+	public boolean canGetData()
 	{
-		if(!init_check)
-			return 0;
-		else
-			return 1;
+		return init_check;
 	}
 
 }

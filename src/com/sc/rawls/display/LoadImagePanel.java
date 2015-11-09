@@ -26,7 +26,8 @@ public class LoadImagePanel extends JPanel implements ActionListener{
 	JButton but, but1, buts,help;
 	JRadioButton r,g,b,a,b64_1,b64_2,b32_1,b32_2,b16_1,b16_2;
 	ButtonGroup rg;
-	JComboBox<Integer> deltaValue;
+	JComboBox<Integer> deltaValue, stepValue;
+	JComboBox<String> feature;
 	JCheckBox gradient;
 	//JLabel status;
 	
@@ -36,13 +37,24 @@ public class LoadImagePanel extends JPanel implements ActionListener{
 		this.setPreferredSize(new Dimension(250, 425));
 		
 		deltaValue = new JComboBox<Integer>();
+		stepValue = new JComboBox<Integer>();
 		
 		for(int i = 0; i < 256; i++)
 		{
 			deltaValue.addItem(i);
+			stepValue.addItem(i);
 		}
 		
 		deltaValue.setSelectedIndex(32);
+		stepValue.setSelectedIndex(32);
+		feature = new JComboBox<String>();
+		
+		feature.addItem("None");
+		feature.addItem("Insert Black");
+		feature.addItem("Insert White");
+		feature.setSelectedIndex(0);
+		
+		JLabel featureLabel = new JLabel("Gradient Features");
 		
 		path = "";
 		s_path = "";
@@ -81,6 +93,7 @@ public class LoadImagePanel extends JPanel implements ActionListener{
 		JLabel label = new JLabel("Sorting Method");
 		label.setLocation(5, 75);
 		JLabel deltaLabel  = new JLabel("Repitition Threshold");
+		JLabel stepLabel = new JLabel("Gradient Steps Between Colors");
 		//JLabel status = new JLabel("No Image Selected");
 		//status.setLocation(5, 140);
 		buts = new JButton("Choose Save Location");
@@ -112,6 +125,10 @@ public class LoadImagePanel extends JPanel implements ActionListener{
 		this.add(deltaLabel);
 		this.add(deltaValue);
 		this.add(gradient);
+		this.add(featureLabel);
+		this.add(feature);
+		this.add(stepLabel);
+		this.add(stepValue);
 		this.add(help);
 		this.add(but1);
 	}
@@ -138,6 +155,14 @@ public class LoadImagePanel extends JPanel implements ActionListener{
 			{
 				int c_res;
 				int selection = 0;
+				boolean do_gradient = gradient.isSelected();
+				int steps = stepValue.getSelectedIndex();
+				int feat = feature.getSelectedIndex();
+				feat += (steps << 8);
+				int rep_size = deltaValue.getSelectedIndex();
+				
+				
+				
 				/*
 				if(r.isSelected())
 				{
@@ -208,7 +233,7 @@ public class LoadImagePanel extends JPanel implements ActionListener{
 				}
 				
 				System.out.println("Starting Image Read");
-				Histogrammer.readAndSortImage(path, s_path,selection,c_res);
+				Histogrammer.readAndSortImage(path, s_path,selection,c_res,rep_size,do_gradient,feat);
 			}
 		}
 		
@@ -239,6 +264,7 @@ public class LoadImagePanel extends JPanel implements ActionListener{
 			System.out.println("\tInsert Black: When selected and computing a gradient will cause the gradient to fade to black, then to the next color.");
 			System.out.println("\tInsert White: When selected and computing a gradient will casue the gradient to fade to white, then to the next color.");
 			System.out.println("\tNone: When selected and computing a gradient will fade directly to the next adjacent color.");
+			System.out.println("\tNumber of Steps: The number of steps the gradient will compute between two adjacent colors.\n\tThis setting will include any inserted black or white values.");
 		}
 		
 	}
