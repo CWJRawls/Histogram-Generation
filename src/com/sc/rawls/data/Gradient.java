@@ -268,5 +268,14 @@ public class Gradient {
 	{
 		return init_check;
 	}
+	
+	/* GET GRADIENT Function
+	 * Takes no arguments and returns a 1-dimensional integer array
+	 * should call check function before asking for data to ensure Gradient array is not null
+	 */
+	public int[] getGradient()
+	{
+		return gradient;
+	}
 
 }
