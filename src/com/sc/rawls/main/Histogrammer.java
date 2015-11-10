@@ -7,6 +7,7 @@ import java.awt.image.DataBufferInt;
 import javax.imageio.ImageIO;
 import javax.swing.JFrame;
 
+import com.sc.rawls.data.Gradient;
 import com.sc.rawls.data.Histogram;
 import com.sc.rawls.display.ErrorPanel;
 import com.sc.rawls.display.LoadImagePanel;
@@ -141,17 +142,52 @@ public class Histogrammer {
 				System.out.println("Sort Finished");
 				int[][] s_data = h.getSortedArray();
 				
-				//initialize the output image to the size of the output buffer
-				out = new BufferedImage(s_data.length, s_data[0].length, BufferedImage.TYPE_INT_RGB);
+				int[] grad_out;
 				
-				System.out.println("Building Sorted Image from Array");
-				for(int i = 0; i < s_data.length; i++)
+				if(do_grad)
 				{
-					for(int j = 0; j < s_data[0].length; j++)
+					int[] base = new int[s_data.length];
+					
+					for(int i = 0; i < base.length; i++)
 					{
-						out.setRGB(i, j, s_data[i][j]);
+						base[i] = s_data[i][0];
+					}
+					
+					Gradient g = new Gradient(base, features, h);
+					
+					g.computeGradient();
+					
+					int[] gtemp = g.getGradient();
+					
+					grad_out = new int[gtemp.length];
+					
+					for(int i = 0; i < gtemp.length; i++)
+					{
+						grad_out[i] = gtemp[i];
+					}
+					
+					//initialize the output image to the size of the output buffer
+					out = new BufferedImage(grad_out.length, 1, BufferedImage.TYPE_INT_RGB);
+					
+					for(int i = 0; i < grad_out.length; i++)
+					{
+						out.setRGB(i, 0, grad_out[i]);
 					}
 				}
+				else
+				{
+					//initialize the output image to the size of the output buffer
+					out = new BufferedImage(s_data.length, s_data[0].length, BufferedImage.TYPE_INT_RGB);
+					System.out.println("Building Image from Array");
+					for(int i = 0; i < s_data.length; i++)
+					{
+						for(int j = 0; j < s_data[0].length; j++)
+						{
+							out.setRGB(i, j, s_data[i][j]);
+						}
+					}
+				}
+				
 				
 				ImageWriter.writeImage(out, s_path);
 			}
