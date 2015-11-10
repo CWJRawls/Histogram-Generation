@@ -54,7 +54,7 @@ public class Gradient {
 		int feat = gradient_feature  & 0xFF;
 		
 		//init the array for the final gradient
-		gradient = new int[(base.length + ((base.length - 1) * steps))];
+		gradient = new int[((base.length - 1) * steps)];
 		
 		if(steps > 0) //Why go through running this if we have no steps?
 		{
@@ -64,31 +64,35 @@ public class Gradient {
 				System.out.println("Computing for no features gradient");
 				for(int i = 0; i < base.length - 1; i++) //we will not calculate anything past the last index
 				{
-					int[] temp = new int[steps + 2];
-					temp[0] = base[i];
-					temp[temp.length - 1] = base[i + 1];
+					int[] temp = new int[steps];
+					//temp[0] = base[i];
+					//temp[temp.length - 1] = base[i + 1];
 					
-					float r_shift = ((base[i] & 0xFF) - (base[i + 1] & 0xFF)) / steps;
-					float g_shift = (((base[i] >> 8) & 0xFF) - ((base[i + 1] >> 8) & 0xFF)) / steps;
-					float b_shift = (((base[i] >> 16) & 0xFF) - ((base[i + 1] >> 16) & 0xFF)) / steps;
+					float r_shift = ((float)((base[i + 1] & 0xFF) - (base[i] & 0xFF))) / ((float)steps);
+					float g_shift = ((float)(((base[i + 1] >> 8) & 0xFF) - ((base[i] >> 8) & 0xFF))) / ((float)steps);
+					float b_shift = ((float)(((base[i + 1] >> 16) & 0xFF) - ((base[i] >> 16) & 0xFF))) / ((float)steps);
 					
 					int r = base[i] & 0xFF;
 					int g = (base[i] >> 8) & 0xFF;
 					int b = (base[i] >> 16) & 0xFF;
 					
 					
-					for(int j = 1; j < temp.length - 1; j++)
+					for(int j = 0; j < temp.length; j++)
 					{
-						int t_r = (int)(r + (j * r_shift));
-						int t_g = (int)(g + (j * g_shift));
-						int t_b = (int)(b + (j * b_shift));
+						int t_r, t_g, t_b;
+						
+						t_r = (int)(r + (j * r_shift));
+						t_g = (int)(g + (j * g_shift));
+						t_b = (int)(b + (j * b_shift));
 						
 						temp[j] = t_r + (t_g << 8) + (t_b << 16);
 					}
 					
 					for(int j = 0; j < temp.length; j++)
 					{
-						gradient[((i * steps) + i + j)] = temp[j];
+						gradient[((i * steps) + j)] = temp[j];
+						int index = ((i * steps) + j);
+						System.out.println("Setting index: " + index);
 					}
 				}
 			}
