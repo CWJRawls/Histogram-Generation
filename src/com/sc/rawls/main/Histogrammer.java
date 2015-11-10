@@ -155,23 +155,28 @@ public class Histogrammer {
 					
 					Gradient g = new Gradient(base, features, h);
 					
-					g.computeGradient();
+					int g_done = g.computeGradient();
 					
-					int[] gtemp = g.getGradient();
-					
-					grad_out = new int[gtemp.length];
-					
-					for(int i = 0; i < gtemp.length; i++)
+					if(g_done == 1)
 					{
-						grad_out[i] = gtemp[i];
-					}
+						int[] gtemp = g.getGradient();
 					
-					//initialize the output image to the size of the output buffer
-					out = new BufferedImage(grad_out.length, 1, BufferedImage.TYPE_INT_RGB);
+						System.out.println("gtemp: " + gtemp.length);
+						
+						grad_out = new int[gtemp.length];
 					
-					for(int i = 0; i < grad_out.length; i++)
-					{
-						out.setRGB(i, 0, grad_out[i]);
+						for(int i = 0; i < gtemp.length; i++)
+						{
+							grad_out[i] = gtemp[i];
+						}
+					
+						//initialize the output image to the size of the output buffer
+						out = new BufferedImage(grad_out.length, 1, BufferedImage.TYPE_INT_RGB);
+					
+						for(int i = 0; i < grad_out.length; i++)
+						{
+							out.setRGB(i, 0, grad_out[i]);
+						}
 					}
 				}
 				else

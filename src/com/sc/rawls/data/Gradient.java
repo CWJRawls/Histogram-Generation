@@ -48,18 +48,20 @@ public class Gradient {
 		if(base.length == 0)
 			return 0;
 		
+		System.out.println("Computing Gradient");
 		//get options chosen for the gradient
 		int steps = (gradient_feature >> 8) & 0xFF;
 		int feat = gradient_feature  & 0xFF;
 		
 		//init the array for the final gradient
-		int[] gradient = new int[(base.length + ((base.length - 1) * steps))];
+		gradient = new int[(base.length + ((base.length - 1) * steps))];
 		
 		if(steps > 0) //Why go through running this if we have no steps?
 		{
 			//if our gradient is drawing a line through the RGB cube
 			if(feat == GRAD_FEATURE_NONE)
 			{
+				System.out.println("Computing for no features gradient");
 				for(int i = 0; i < base.length - 1; i++) //we will not calculate anything past the last index
 				{
 					int[] temp = new int[steps + 2];
@@ -230,16 +232,16 @@ public class Gradient {
 	 */
 	private void removeExtraIndeces()
 	{
-		int end = base.length;
+		int end = base.length - 1;
 		
 		//start at the end of the matrix and find all open black pixels
-		for(int i = base.length - 1; hist.getBinAt(i) == 0 && i >= 0; i++)
+		for(int i = base.length - 1; hist.getBinAt(i) == 0 && i >= 0; i--)
 		{
 			end = i;
 		}
 		
 		//only reinitialize matrices in the case that empty pixels need to be removed
-		if(end != base.length)
+		if(end != base.length - 1)
 		{
 			//create a temporary array to hold values
 			int[] temp = new int[end + 1];
@@ -257,6 +259,8 @@ public class Gradient {
 				base[i] = temp[i];
 			}
 		}
+		
+		System.out.println("Base Size: " + base.length);
 	}
 	
 	/* CAN GET DATA Function
